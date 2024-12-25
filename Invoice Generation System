@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>Invoice Generation System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body{
+            margin: 0;
+            padding: 0;
+            background-color:#f4f4f9;
+            font-family:'Times New Roman', Times, serif;
+        }
+       .invoice{
+            width:80%;
+            margin: 50px auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+        }
+        input{
+            width:600%;
+           border: 1px solid #e2e2e8;
+           height: 35px;
+           border-radius: 5px;
+        }
+        label{
+           display: block;
+           margin-bottom: 5px;
+        }
+        button {
+            background-color:rgb(3, 158, 255);
+            padding:10px;
+            color: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        .invoice-preview {
+            display: none;
+            margin-top: 30px;
+            padding:20px;
+            background-color: white;
+            width:80%;
+            margin: 50px auto;
+        }
+
+        #invoice {
+            margin-top: 20px;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        #download-invoice, #print-invoice {
+         margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice">
+        <form id="Form"> 
+            <table>
+                <tr>
+                    <h1 style="text-align: center;">Invoice Generating System</h1>
+                </tr>
+                <tr>
+                    <td><h2>Customer Details</h2></td>
+                </tr>
+                <tr>
+                    <td><label for="name">Customer Name</label></td>
+                    <td><input type="text" required id="name"></td>
+                </tr>
+                <tr>
+                    <td><label for="address">Customer Address</label></td>
+                    <td><input type="text" required id="address"></td>
+                </tr>
+                <tr>
+                    <td><h2>Item Details</h2></td>
+                </tr>
+                <tr>
+                    <td><label for="description">Item Description</label></td>
+                    <td><input type="text" required id="description"></td>
+                </tr>
+                <tr>
+                    <td><label for="quantity">Quantity</label></td>
+                    <td><input type="number" required id="quantity"></td>
+                </tr>
+                <tr>
+                    <td><label for="price">Price per unit</label></td>
+                    <td><input type="number" required id="price"></td>
+                </tr>
+                <tr>
+                    <td><label for="tax">Tax Rate(%)</label></td>
+                    <td><input type="number" required id="tax"></td>
+                </tr>
+                <tr>
+                    <td><button type="submit">Generate Invoice</button></td>
+                </tr>
+            </table>
+        </form>
+    </div>
+    <div id="invoice-preview" class="invoice-preview">
+        <h2>Invoice Preview</h2>
+        <div id="invoice"></div>
+        <button id="download-invoice" style="display: none;">Download PDF</button>
+        <button id="print-invoice" style="display: none;">Print Invoice</button>
+    </div>
+    </div>
+    <script>
+        document.getElementById("Form").addEventListener("submit", function (event) {
+    event.preventDefault();
+
+    const customerName = document.getElementById("name").value;
+    const customerAddress = document.getElementById("address").value;
+    const itemDescription = document.getElementById("description").value;
+    const quantity = parseInt(document.getElementById("quantity").value);
+    const pricePerUnit = parseFloat(document.getElementById("price").value);
+    const taxRate = parseFloat(document.getElementById("tax").value);
+
+    if (isNaN(quantity) || quantity <= 0 || isNaN(pricePerUnit) || pricePerUnit <= 0 || isNaN(taxRate)) {
+        alert("Please enter valid values for quantity, price, and tax rate.");
+        return;
+    }
+
+
+    const totalBeforeTax = quantity * pricePerUnit;
+    const taxAmount = totalBeforeTax * (taxRate / 100);
+    const totalAmount = totalBeforeTax + taxAmount;
+
+    const invoiceContent = `
+        <h2>Invoice</h2>
+        <p><strong>Customer Name:</strong> ${customerName}</p>
+        <p><strong>Customer Address:</strong> ${customerAddress}</p>
+        <p><strong>Item Description:</strong> ${itemDescription}</p>
+        <p><strong>Quantity:</strong> ${quantity}</p>
+        <p><strong>Price per Unit:</strong> $${pricePerUnit.toFixed(2)}</p>
+        <p><strong>Total Before Tax:</strong> $${totalBeforeTax.toFixed(2)}</p>
+        <p><strong>Tax (${taxRate}%):</strong> $${taxAmount.toFixed(2)}</p>
+        <p><strong>Total Amount Due:</strong> $${totalAmount.toFixed(2)}</p>
+    `;
+
+    document.getElementById("invoice").innerHTML = invoiceContent;
+
+   
+    document.getElementById("invoice-preview").style.display = "block";
+    document.getElementById("download-invoice").style.display = "inline-block";
+    document.getElementById("print-invoice").style.display = "inline-block";
+
+    document.getElementById("download-invoice").addEventListener("click", function () {
+        const doc = new jsPDF();
+        doc.html(document.getElementById('invoice'), {
+            callback: function (doc) {
+                doc.save('invoice.pdf');
+            },
+            margin: [10, 10],
+            x: 10,
+            y: 10
+        });
+    });
+
+    document.getElementById("print-invoice").addEventListener("click", function () {
+        window.print();
+    });
+});
+
+    </script>
+
+</body>
+</html>
